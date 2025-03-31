@@ -59,7 +59,7 @@ print(adi.__version__)
 
 '''Key Parameters'''
 sample_rate = .522e6 
-center_freq = 2.1e9 # test with .55e9 for upped refresh rate
+center_freq = .55e9 # test with .55e9 for upped refresh rate
 signal_freq = 100e3
 rx_gain = 60   # must be between -3 and 70
 tx_gain = 0   # must be between 0 and -88
