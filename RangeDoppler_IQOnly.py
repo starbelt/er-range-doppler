@@ -313,6 +313,8 @@ except KeyboardInterrupt:  # press ctrl-c to stop the loop
 my_sdr.tx_destroy_buffer()
 print("Pluto Buffer Cleared!")
 refreshrate = current_time[-1] - current_time[-2]
+refreshrate = float(refreshrate.total_seconds())
+refreshrate = 1 / refreshrate
 print("Refresh Rate: ", refreshrate)
 if save_data == True:
     folder = f[:-18]
