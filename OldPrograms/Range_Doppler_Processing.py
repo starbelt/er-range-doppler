@@ -164,21 +164,23 @@ raw_data = freq_process(all_data[i])
 # print(raw_data)
 i=int((i+1) % len(all_data))
 
-# Replace the imshow with pcolormesh for proper velocity mapping
+# Create the figure
 range_doppler_fig, ax = plt.subplots(1, figsize=(7,7))
 
-# Create proper mesh for accurate data placement
-range_mesh, velocity_mesh = np.meshgrid(dist, velocity_bins)
-range_doppler = ax.pcolormesh(range_mesh, velocity_mesh, raw_data.T, cmap=matplotlib.colormaps.get_cmap(cmn))
+# Calculate the correct extent for imshow
+extent = [-max_theoretical_vel, max_theoretical_vel, dist.min(), dist.max()]
+range_doppler = ax.imshow(raw_data, aspect='auto', 
+                          extent=extent, 
+                          origin='lower', 
+                          cmap=matplotlib.colormaps.get_cmap(cmn))
 
-# These limits can be set to display only part of the full range
-ax.set_xlim([-max_doppler_vel, max_doppler_vel])
+# Set display limits (can be different from full theoretical range)
+ax.set_xlim([-max_doppler_vel, max_doppler_vel])  # Display only part of the velocity range
 ax.set_ylim([-1, max_range])
 ax.set_yticks(np.arange(-1, max_range, 1))
 ax.set_ylabel('Range [m]')
 ax.set_title('Range Doppler Spectrum')
 ax.set_xlabel('Velocity [m/s]')
-# range_doppler = ax.imshow(raw_data, aspect='auto', extent=extent, origin='lower', cmap=matplotlib.colormaps.get_cmap(cmn))
 
 print("CTRL + c to stop the loop")
 if step_thru_plots == True:
