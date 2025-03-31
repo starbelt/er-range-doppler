@@ -80,8 +80,8 @@ max_doppler_vel = 5
 """ Program the basic hardware settings
 """
 # Instantiate all the Devices
-rpi_ip = "ip:19.168.55.100"  # IP address of the Raspberry Pi
-sdr_ip = "ip:192.168.55.100:50901"  # "192.168.2.1, or pluto.local"  # IP address of the Transceiver Block
+rpi_ip = "ip:phaser.local"  # IP address of the Raspberry Pi
+sdr_ip = "ip:192.168.2.1"  # "192.168.2.1, or pluto.local"  # IP address of the Transceiver Block
 my_sdr = adi.ad9361(uri=sdr_ip)
 my_phaser = adi.CN0566(uri=rpi_ip, sdr=my_sdr)
 
