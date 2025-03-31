@@ -370,6 +370,7 @@ except KeyboardInterrupt:  # press ctrl-c to stop the loop
 
 # %%
 # Pluto transmit shutdown
+time.sleep(0.5)
 my_sdr.tx_destroy_buffer()
 print("Pluto Buffer Cleared!")
 if save_data == True:
