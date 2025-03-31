@@ -136,8 +136,8 @@ my_phaser.freq_dev_time = int(ramp_time)  # total time (in us) of the complete f
 print("requested freq dev time (us) = ", ramp_time)
 PRI_ms = ramp_time/1e3 + 0.04095
 # desired_delay_us = (PRI_ms * 1000) - ramp_time
-my_phaser.delay_word = 4095  # 12 bit delay word.  4095*PFD = 40.95 us.  For sawtooth ramps, this is also the length of the Ramp_complete signal
-my_phaser.delay_clk = "PFD"  # can be 'PFD' or 'PFD*CLK1'
+my_phaser.delay_word = 255  # 12 bit delay word.  4095*PFD = 40.95 us.  For sawtooth ramps, this is also the length of the Ramp_complete signal
+my_phaser.delay_clk = "PFD*CLK1"  # can be 'PFD' or 'PFD*CLK1'
 my_phaser.delay_start_en = 0  # delay start
 my_phaser.ramp_delay_en = 1  # delay between ramps.
 my_phaser.trig_delay_en = 0  # triangle delay
