@@ -92,7 +92,7 @@ c = 3e8
 wavelength = c / output_freq
 slope = chirp_BW / ramp_time_s
 freq = np.linspace(-sample_rate/2, sample_rate/2, N_frame)
-dist = (freq - signal_freq) * c / (2 * slope)
+dist = (freq - signal_freq - 25e3) * c / (2 * slope)
 velocity_bins = np.linspace(-max_doppler_vel, max_doppler_vel, num_chirps)
 
 # Resolutions
@@ -168,7 +168,7 @@ i=int((i+1) % len(all_data))
 range_doppler_fig, ax = plt.subplots(1, figsize=(7,7))
 
 # Calculate the correct extent for imshow
-extent = [-max_theoretical_vel, max_theoretical_vel, dist.min(), dist.max()]
+extent = [-max_doppler_vel, max_doppler_vel, dist.min(), dist.max()]
 range_doppler = ax.imshow(raw_data, aspect='auto', 
                           extent=extent, 
                           origin='lower', 
