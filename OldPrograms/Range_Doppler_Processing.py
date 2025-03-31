@@ -196,7 +196,7 @@ try:
                 freq_process_data = freq_process(Chirp2P)
         else:
             freq_process_data = freq_process(all_data[i])
-        range_doppler.set_array(freq_process_data.ravel())
+        range_doppler.set_array(freq_process_data)
         plt.show(block=False)
         if time_idx == 0:
             playback_start_time = time.time()
