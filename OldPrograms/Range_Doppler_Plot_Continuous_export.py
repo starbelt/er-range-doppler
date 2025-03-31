@@ -79,7 +79,7 @@ f = f"DataExports/RangeDoppler/DefaultExports/{st}/range_doppler.npy"
 f_csv = f"{f[:-4]}.csv"
 max_doppler_vel = 0.5
 max_dist = 10
-min_dist = 0
+min_dist = -1
 max_range = max_dist
 
 # %%
@@ -181,7 +181,7 @@ tdd.enable = True
 # For best freq linearity, stay away from the start of the ramps
 ramp_time = int(my_phaser.freq_dev_time) # - begin_offset_time)
 ramp_time_s = ramp_time / 1e6
-begin_offset_time = 0.1 * ramp_time_s   # time in seconds
+begin_offset_time = 0.05 * ramp_time_s   # time in seconds
 print("actual freq dev time = ", ramp_time)
 good_ramp_samples = int((ramp_time_s - begin_offset_time) * sample_rate)
 start_offset_time = tdd.channel[0].on_ms/1e3 + begin_offset_time

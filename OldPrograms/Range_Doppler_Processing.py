@@ -55,7 +55,7 @@ all_data = np.load(f)
 
 
 MTI_filter = 'none'  # choices are none, 2pulse, or 3pulse
-min_scale = 0
+min_scale = -2
 max_scale = 10
 step_thru_plots = False
 time_divider = 1
@@ -165,8 +165,8 @@ extent = [-max_doppler_vel, max_doppler_vel, dist.min(), dist.max()]
 cmaps = ['inferno', 'plasma']
 cmn = cmaps[0]
 ax.set_xlim([-max_doppler_vel, max_doppler_vel])
-ax.set_ylim([0, max_range])
-ax.set_yticks(np.arange(0, max_range, 1))
+ax.set_ylim([-1, max_range])
+ax.set_yticks(np.arange(-1, max_range, 1))
 ax.set_ylabel('Range [m]')
 ax.set_title('Range Doppler Spectrum')
 ax.set_xlabel('Velocity [m/s]')
