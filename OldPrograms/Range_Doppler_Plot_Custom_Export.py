@@ -77,7 +77,7 @@ start_time = datetime.datetime.now() # Get start time
 st = str(start_time).replace(":", ".").replace(" ", "_") # Remove ":" and replace spaces with "_" 
 f = f"DataExports/RangeDoppler/DefaultExports/{st}/range_doppler.npy"
 f_csv = f"{f[:-4]}.csv"
-max_doppler_vel = 2
+min_doppler_plot_vel = 2
 max_dist = 10
 min_dist = 0
 max_range = max_dist
@@ -234,6 +234,9 @@ R_res = c / (2 * BW)
 print(R_res)
 v_res = wavelength / (2 * num_bursts * PRI_s)
 print(v_res)
+# Calculate max_doppler_vel to ensure 56 pixels are visible
+calculated_max_doppler_vel = 56 * v_res / 2
+max_doppler_vel = max(calculated_max_doppler_vel, min_doppler_plot_vel)
 # Doppler spectrum limits
 max_doppler_freq = PRF / 2
 # max_doppler_vel = max_doppler_freq * wavelength / 2
