@@ -106,6 +106,8 @@ max_doppler_freq = PRF / 2
 # max_doppler_vel = max_doppler_freq * wavelength / 2
 
 print("sample_rate = ", sample_rate/1e6, "MHz, ramp_time = ", int(ramp_time_s*(1e6)), "us, num_chirps = ", num_chirps, ", PRI = ", frame_length_ms, " ms")
+max_theoretical_vel = wavelength * PRF / 4
+print(f"Theoretical max velocity: ±{max_theoretical_vel:.2f} m/s")
 
 
 # %%
@@ -166,10 +168,8 @@ i=int((i+1) % len(all_data))
 range_doppler_fig, ax = plt.subplots(1, figsize=(7,7))
 
 # Create proper mesh for accurate data placement
-velocity_mesh, range_mesh = np.meshgrid(velocity_bins, dist)
-
-# Use pcolormesh instead of imshow for accurate bin mapping
-range_doppler = ax.pcolormesh(velocity_mesh, range_mesh, raw_data, cmap=matplotlib.colormaps.get_cmap(cmn))
+velocity_mesh, range_mesh = np.meshgrid(dist, velocity_bins)
+range_doppler = ax.pcolormesh(range_mesh.T, velocity_mesh.T, raw_data, cmap=matplotlib.colormaps.get_cmap(cmn))
 
 # These limits can be set to display only part of the full range
 ax.set_xlim([-max_doppler_vel, max_doppler_vel])
