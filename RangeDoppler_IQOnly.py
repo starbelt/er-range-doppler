@@ -98,8 +98,8 @@ my_phaser.load_phase_cal()
 for i in range(0, 8):
     my_phaser.set_chan_phase(i, 0)
 
-gain_list = [127] * 8
-#gain_list = [8, 34, 84, 127, 127, 84, 34, 8]  # Blackman taper
+#gain_list = [127] * 8
+gain_list = [8, 34, 84, 127, 127, 84, 34, 8]  # Blackman taper
 for i in range(0, len(gain_list)):
     my_phaser.set_chan_gain(i, gain_list[i], apply_cal=True)
 
