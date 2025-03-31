@@ -93,6 +93,7 @@ wavelength = c / output_freq
 slope = chirp_BW / ramp_time_s
 freq = np.linspace(-sample_rate/2, sample_rate/2, N_frame)
 dist = (freq - signal_freq) * c / (2 * slope)
+velocity_bins = np.linspace(-max_doppler_vel, max_doppler_vel, num_chirps)
 
 # Resolutions
 R_res = c / (2 * chirp_BW)
@@ -160,17 +161,25 @@ raw_data = freq_process(all_data[i])
 # print(raw_data.shape)
 # print(raw_data)
 i=int((i+1) % len(all_data))
+
+# Replace the imshow with pcolormesh for proper velocity mapping
 range_doppler_fig, ax = plt.subplots(1, figsize=(7,7))
-extent = [-max_doppler_vel, max_doppler_vel, dist.min(), dist.max()]
-cmaps = ['inferno', 'plasma']
-cmn = cmaps[0]
+
+# Create proper mesh for accurate data placement
+velocity_mesh, range_mesh = np.meshgrid(velocity_bins, dist)
+
+# Use pcolormesh instead of imshow for accurate bin mapping
+range_doppler = ax.pcolormesh(velocity_mesh, range_mesh, raw_data, 
+                             cmap=matplotlib.colormaps.get_cmap(cmn))
+
+# These limits can be set to display only part of the full range
 ax.set_xlim([-max_doppler_vel, max_doppler_vel])
 ax.set_ylim([-1, max_range])
 ax.set_yticks(np.arange(-1, max_range, 1))
 ax.set_ylabel('Range [m]')
 ax.set_title('Range Doppler Spectrum')
 ax.set_xlabel('Velocity [m/s]')
-range_doppler = ax.imshow(raw_data, aspect='auto', extent=extent, origin='lower', cmap=matplotlib.colormaps.get_cmap(cmn))
+# range_doppler = ax.imshow(raw_data, aspect='auto', extent=extent, origin='lower', cmap=matplotlib.colormaps.get_cmap(cmn))
 
 print("CTRL + c to stop the loop")
 if step_thru_plots == True:
@@ -186,7 +195,7 @@ try:
                 freq_process_data = freq_process(Chirp2P)
         else:
             freq_process_data = freq_process(all_data[i])
-        range_doppler.set_data(freq_process_data)
+        range_doppler.set_array(freq_process_data.ravel())
         plt.show(block=False)
         if time_idx == 0:
             playback_start_time = time.time()
