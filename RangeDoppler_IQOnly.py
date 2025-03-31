@@ -58,7 +58,7 @@ import adi # type: ignore
 print(adi.__version__)
 
 '''Key Parameters'''
-sample_rate = .6e6 
+sample_rate = .522e6 
 center_freq = 2.1e9 # test with .55e9 for upped refresh rate
 signal_freq = 100e3
 rx_gain = 60   # must be between -3 and 70
@@ -154,7 +154,7 @@ sdr_pins.gpio_phaser_enable = True
 tdd.enable = False         # disable TDD to configure the registers
 tdd.sync_external = True
 tdd.startup_delay_ms = 0
-PRI_ms = ramp_time/1e3 + .1 #0.2 if this breaks stuff
+PRI_ms = ramp_time/1e3 + .07 #0.2 if this breaks stuff
 tdd.frame_length_ms = PRI_ms    # each chirp is spaced this far apart
 #tdd.frame_length_raw = PRI_ms/1000 * 2 * sample_rate
 tdd.burst_count = num_chirps       # number of chirps in one continuous receive buffer
