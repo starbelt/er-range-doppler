@@ -169,8 +169,7 @@ range_doppler_fig, ax = plt.subplots(1, figsize=(7,7))
 velocity_mesh, range_mesh = np.meshgrid(velocity_bins, dist)
 
 # Use pcolormesh instead of imshow for accurate bin mapping
-range_doppler = ax.pcolormesh(velocity_mesh, range_mesh, raw_data, 
-                             cmap=matplotlib.colormaps.get_cmap(cmn))
+range_doppler = ax.pcolormesh(velocity_mesh, range_mesh, raw_data, cmap=matplotlib.colormaps.get_cmap(cmn))
 
 # These limits can be set to display only part of the full range
 ax.set_xlim([-max_doppler_vel, max_doppler_vel])
