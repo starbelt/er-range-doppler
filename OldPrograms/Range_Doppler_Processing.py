@@ -168,7 +168,7 @@ i=int((i+1) % len(all_data))
 range_doppler_fig, ax = plt.subplots(1, figsize=(7,7))
 
 # Calculate the correct extent for imshow
-print(dist.max())
+# print(dist.max())
 extent = [-max_doppler_vel, max_doppler_vel, dist.min(), dist.max()]
 range_doppler = ax.imshow(raw_data, aspect='auto', 
                           extent=extent, 
@@ -177,8 +177,8 @@ range_doppler = ax.imshow(raw_data, aspect='auto',
 
 # Set display limits (can be different from full theoretical range)
 ax.set_xlim([-max_doppler_vel, max_doppler_vel])  # Display only part of the velocity range
-ax.set_ylim([-1, max_range])
-ax.set_yticks(np.arange(-1, max_range, 1))
+ax.set_ylim([-1, dist.max()])
+ax.set_yticks(np.arange(-1, int(dist.max()), 1))
 ax.set_ylabel('Range [m]')
 ax.set_title('Range Doppler Spectrum')
 ax.set_xlabel('Velocity [m/s]')
