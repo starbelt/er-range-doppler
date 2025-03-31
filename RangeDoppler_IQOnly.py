@@ -73,6 +73,7 @@ max_scale = 10
 save_data = True   # saves data for later processing (use "Range_Doppler_Processing.py")
 start_time = datetime.datetime.now() # Get start time
 st = str(start_time).replace(":", ".").replace(" ", "_") # Remove ":" and replace spaces with "_" 
+st = f"{st}_{num_chirps}chirps"
 f = f"DataExports/RangeDoppler/DefaultExports/{st}/range_doppler.npy"
 f_csv = f"{f[:-4]}.csv"
 min_doppler_plot_vel = 2
