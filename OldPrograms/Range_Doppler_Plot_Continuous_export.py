@@ -268,10 +268,13 @@ def get_radar_data():
     # Collect data
     # print("getdata start")
     # print(datetime.datetime.now())
-    
+    time.sleep(0.001)
     my_phaser._gpios.gpio_burst = 0
+    time.sleep(0.0001)
     my_phaser._gpios.gpio_burst = 1
+    time.sleep(0.0001)
     my_phaser._gpios.gpio_burst = 0
+    time.sleep(0.001)
     data = my_sdr.rx()
     chan1 = data[0]
     chan2 = data[1]
