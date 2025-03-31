@@ -78,7 +78,7 @@ st = str(start_time).replace(":", ".").replace(" ", "_") # Remove ":" and replac
 f = f"DataExports/RangeDoppler/DefaultExports/{st}/range_doppler.npy"
 f_csv = f"{f[:-4]}.csv"
 max_doppler_vel = 1.5
-max_dist = 4
+max_dist = 10
 min_dist = 0
 max_range = max_dist
 
