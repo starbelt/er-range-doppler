@@ -58,7 +58,7 @@ import adi # type: ignore
 print(adi.__version__)
 
 '''Key Parameters'''
-sample_rate = .6e6 
+sample_rate = .522e6 
 center_freq = 2.1e9
 signal_freq = 100e3
 rx_gain = 60   # must be between -3 and 70
@@ -66,10 +66,10 @@ tx_gain = 0   # must be between 0 and -88
 output_freq = 10e9
 chirp_BW = 1000e6
 ramp_time = 300  # us
-num_chirps = 256
+num_chirps = 128
 # max_range = 10
-min_scale = 3
-max_scale = 7
+min_scale = 0
+max_scale = 10
 plot_data = False
 mti_filter = False
 save_data = True   # saves data for later processing (use "Range_Doppler_Processing.py")
