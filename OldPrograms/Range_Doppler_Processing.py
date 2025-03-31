@@ -154,7 +154,7 @@ def freq_process(data):
 
 # %%
 # Plot range doppler data, loop through at the end of the data set
-cmn = ''
+cmn = 'viridis'
 i = 0
 time_idx = 0
 raw_data = freq_process(all_data[i])
