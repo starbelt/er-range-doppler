@@ -91,7 +91,7 @@ N_frame = int(PRI * float(sample_rate))
 c = 3e8
 wavelength = c / output_freq
 slope = chirp_BW / ramp_time_s
-freq = np.linspace(lower_freq, upper_freq, N_frame)
+freq = np.linspace(-sample_rate/2, sample_rate/2, N_frame)
 dist = (freq - signal_freq) * c / (2 * slope)
 
 # Resolutions
