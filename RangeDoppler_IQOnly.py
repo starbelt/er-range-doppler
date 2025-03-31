@@ -41,10 +41,13 @@
 # Imports
 import sys
 import time
+import matplotlib # type: ignore
+import matplotlib.pyplot as plt # type: ignore
 import numpy as np
 import datetime
 import os
 import csv
+plt.close('all')
 
 
 '''This script uses the new Pluto TDD engine
@@ -55,26 +58,24 @@ import adi # type: ignore
 print(adi.__version__)
 
 '''Key Parameters'''
-sample_rate = .6e6 
+sample_rate = .522e6 
 center_freq = 2.1e9
 signal_freq = 100e3
 rx_gain = 60   # must be between -3 and 70
 tx_gain = 0   # must be between 0 and -88
-output_freq = 9.9e9
-chirp_BW = 600e6
+output_freq = 10e9
+chirp_BW = 1000e6
 ramp_time = 300  # us
-num_chirps = 384
+num_chirps = 128*2
 # max_range = 10
-min_scale = 3
-max_scale = 7
-plot_data = False
-mti_filter = False
+min_scale = 0
+max_scale = 10
 save_data = True   # saves data for later processing (use "Range_Doppler_Processing.py")
 start_time = datetime.datetime.now() # Get start time
 st = str(start_time).replace(":", ".").replace(" ", "_") # Remove ":" and replace spaces with "_" 
 f = f"DataExports/RangeDoppler/DefaultExports/{st}/range_doppler.npy"
 f_csv = f"{f[:-4]}.csv"
-max_doppler_vel = 1.5
+min_doppler_plot_vel = 2
 max_dist = 10
 min_dist = 0
 max_range = max_dist
@@ -223,7 +224,7 @@ wavelength = c / output_freq
 slope = BW / ramp_time_s
 upper_freq = (max_dist * 2 * slope / c) + signal_freq + 1
 lower_freq = (min_dist * 2 * slope / c) + signal_freq - 1
-freq = np.linspace(lower_freq, upper_freq, N_frame)
+freq = np.linspace(-sample_rate/2, sample_rate/2, N_frame)
 dist = (freq - signal_freq) * c / (2 * slope)
 
 # Resolutions
@@ -231,6 +232,9 @@ R_res = c / (2 * BW)
 print(R_res)
 v_res = wavelength / (2 * num_bursts * PRI_s)
 print(v_res)
+# Calculate max_doppler_vel to ensure 56 pixels are visible
+calculated_max_doppler_vel = 56 * v_res / 2
+max_doppler_vel = max(calculated_max_doppler_vel, min_doppler_plot_vel)
 # Doppler spectrum limits
 max_doppler_freq = PRF / 2
 # max_doppler_vel = max_doppler_freq * wavelength / 2
@@ -281,49 +285,10 @@ def get_radar_data():
     # print("getdata stop")
     # print(datetime.datetime.now())
     return rx_bursts
-
-def freq_process(data):
-    rx_bursts_fft = np.fft.fftshift(abs(np.fft.fft2(data)))
-    range_doppler_data = np.log10(rx_bursts_fft).T
-    range_doppler_data = np.clip(range_doppler_data, min_scale, max_scale)  # clip the data to control the max spectrogram scale
-    return range_doppler_data
-
-
-# %%
     
 rx_bursts = get_radar_data()
-radar_data = freq_process(rx_bursts)
 all_data = []
 current_time = []
-
-# if plot_data == True:
-#     range_doppler_fig, ax = plt.subplots(figsize=(14, 7))
-#     extent = [-max_doppler_vel, max_doppler_vel, dist.min(), dist.max()]
-#     cmaps = ['inferno', 'plasma']
-#     cmn = cmaps[0]
-#     try:
-#         range_doppler = ax.imshow(radar_data, aspect='auto',
-#             extent=extent, origin='lower', cmap=matplotlib.colormaps.get_cmap(cmn),
-#             )
-#     except:
-#         print("Using an older version of MatPlotLIB")
-#         from matplotlib.cm import get_cmap # type: ignore
-#         range_doppler = ax.imshow(radar_data, aspect='auto', vmin=0, vmax=8,
-#             extent=extent, origin='lower', cmap=get_cmap(cmn),
-#             )
-#     ax.set_title('Range Doppler Spectrum', fontsize=24)
-#     ax.set_xlabel('Velocity [m/s]', fontsize=22)
-#     ax.set_ylabel('Range [m]', fontsize=22)
-    
-#     ax.set_xlim([-max_doppler_vel, max_doppler_vel])
-#     ax.set_ylim([0, max_range])
-#     ax.set_yticks(np.arange(0, max_range, max_range/20))
-#     plt.xticks(fontsize=20)
-#     plt.yticks(fontsize=20)
-    
-#     print("sample_rate = ", sample_rate/1e6, "MHz, ramp_time = ", ramp_time, "us, num_chirps = ", num_chirps)
-#     print("CTRL + c to stop the loop")
-# # plt.pause(.01)
 
 try:
     while True:
@@ -334,30 +299,9 @@ try:
             all_data.append(rx_bursts)
             current_time.append(datetime.datetime.now())
             print("save")
-        # if plot_data == True:
-        #     if mti_filter == True:
-        #         rx_chirps = []
-        #         rx_chirps = rx_bursts
-        #         num_samples = len(rx_chirps[0])
-        #         # create 2 pulse canceller MTI array
-        #         Chirp2P = np.ones([num_chirps, num_samples]) * 1j
-        #         for chirp in range(num_chirps-1):
-        #             chirpI = rx_chirps[chirp,:]
-        #             chirpI1 = rx_chirps[chirp+1,:]
-        #             chirp_correlation = np.correlate(chirpI, chirpI1, 'valid')
-        #             angle_diff = np.angle(chirp_correlation, deg=False)  # returns radians
-        #             Chirp2P[chirp:] = chirpI1 - chirpI * np.exp(-1j*angle_diff[0])
-        #         rx_bursts = Chirp2P
-                
-            radar_data = freq_process(rx_bursts)
-            # range_doppler.set_data(radar_data)
-            # plt.show(block=False)
-            # plt.pause(.1)
-        else:
-            # print("sleep start")
-            # print(datetime.datetime.now())
-            good_samples_time = good_ramp_samples / sample_rate
-            time.sleep(PRI_s - good_samples_time)
+        
+        good_samples_time = good_ramp_samples / sample_rate
+        time.sleep(PRI_s - good_samples_time)
         # print("try stop")
         # print(datetime.datetime.now())
 except KeyboardInterrupt:  # press ctrl-c to stop the loop
@@ -377,14 +321,6 @@ if save_data == True:
     np.save(f[:-4]+"_config.npy", [sample_rate, signal_freq, output_freq, num_chirps, chirp_BW, ramp_time_s, tdd.frame_length_ms, max_doppler_vel, max_range, upper_freq, lower_freq])
 
     file_exists = os.path.isfile(f)  # Check if file exists
-    
-    with open(f_csv, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        if not file_exists:
-            # writer.writerow(["Time Since Start (s)", "Frequency (Hz)", "Magnitude (dBFS)"])
-            t="filler"
-        for row in radar_data:
-            writer.writerow(row)
     
     f_time = f"{f[:-4]}_time.csv"
     
