@@ -63,10 +63,10 @@ center_freq = 2.1e9
 signal_freq = 100e3
 rx_gain = 60   # must be between -3 and 70
 tx_gain = 0   # must be between 0 and -88
-output_freq = 9.9e9
-chirp_BW = 600e6
+output_freq = 10e9
+chirp_BW = 1000e6
 ramp_time = 300  # us
-num_chirps = 384
+num_chirps = 256
 # max_range = 10
 min_scale = 3
 max_scale = 7
@@ -226,7 +226,7 @@ wavelength = c / output_freq
 slope = BW / ramp_time_s
 upper_freq = (max_dist * 2 * slope / c) + signal_freq + 1
 lower_freq = (min_dist * 2 * slope / c) + signal_freq - 1
-freq = np.linspace(lower_freq, upper_freq, N_frame)
+freq = np.linspace(-sample_rate/2, sample_rate/2, N_frame)
 dist = (freq - signal_freq) * c / (2 * slope)
 
 # Resolutions
