@@ -55,8 +55,8 @@ all_data = np.load(f)
 
 
 MTI_filter = 'none'  # choices are none, 2pulse, or 3pulse
-min_scale = 4
-max_scale = 6
+min_scale = 0
+max_scale = 4
 step_thru_plots = False
 time_divider = 1
 
