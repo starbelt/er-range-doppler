@@ -81,6 +81,7 @@ max_doppler_vel = 0.5
 max_dist = 10
 min_dist = -1
 max_range = max_dist
+freq_offset = 25e3
 
 # %%
 """ Program the basic hardware settings
@@ -227,9 +228,9 @@ N_frame = int(PRI_s * float(sample_rate))
 c = 3e8
 wavelength = c / output_freq
 slope = BW / ramp_time_s
-upper_freq = (max_dist * 2 * slope / c) + signal_freq + 1
-lower_freq = (min_dist * 2 * slope / c) + signal_freq - 1
-freq = np.linspace(lower_freq, upper_freq, N_frame)
+upper_freq = (max_dist * 2 * slope / c) + signal_freq + freq_offset
+lower_freq = (min_dist * 2 * slope / c) + signal_freq + freq_offset
+freq = np.linspace(-sample_rate/2, sample_rate/2, N_frame)
 dist = (freq - signal_freq) * c / (2 * slope)
 
 # Resolutions
