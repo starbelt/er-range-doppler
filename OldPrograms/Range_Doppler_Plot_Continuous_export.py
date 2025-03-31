@@ -66,7 +66,7 @@ tx_gain = 0   # must be between 0 and -88
 output_freq = 9.9e9
 chirp_BW = 600e6
 ramp_time = 300  # us 
-num_chirps = 384 #try 128 for faster refresh
+num_chirps = 256 #try 128 for faster refresh
 # max_range = 10
 min_scale = 3
 max_scale = 7
@@ -144,7 +144,8 @@ my_phaser.trig_delay_en = 0  # triangle delay
 my_phaser.ramp_mode = "continuous_sawtooth"  # ramp_mode can be:  "disabled", "continuous_sawtooth", "continuous_triangular", "single_sawtooth_burst", "single_ramp_burst"
 my_phaser.sing_ful_tri = 0  # full triangle enable/disable -- this is used with the single_ramp_burst mode
 my_phaser.tx_trig_en = 0  # start a ramp with TXdata
-my_phaser.enable = 0  # 0 = PLL enable.  Write this last to update all the registers
+my_phaser.enable = 1  # 0 = PLL enable.  Write this last to update all the registers
+time.sleep(0.1)  # wait for PLL to lock
 
 # %%
 """ Synchronize chirps to the start of each Pluto receive buffer
@@ -268,9 +269,9 @@ def get_radar_data():
     # print("getdata start")
     # print(datetime.datetime.now())
     
-    my_phaser._gpios.gpio_burst = 0
-    my_phaser._gpios.gpio_burst = 1
-    my_phaser._gpios.gpio_burst = 0
+    # my_phaser._gpios.gpio_burst = 0
+    # my_phaser._gpios.gpio_burst = 1
+    # my_phaser._gpios.gpio_burst = 0
     data = my_sdr.rx()
     chan1 = data[0]
     chan2 = data[1]
