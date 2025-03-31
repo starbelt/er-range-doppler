@@ -151,7 +151,7 @@ def freq_process(data):
         for r in range(range_delete):
             start_bin = int(len(range_doppler_data)/2)
             range_doppler_data[start_bin+r, :] = np.zeros(num_chirps)
-    range_doppler_data = np.clip(range_doppler_data, min_scale, max_scale)  # clip the data to control the max spectrogram scale
+    range_doppler_data = np.clip(range_doppler_data, min_scale, dist.max())  # clip the data to control the max spectrogram scale
     return range_doppler_data
 
 # %%
