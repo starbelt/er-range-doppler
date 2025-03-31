@@ -135,11 +135,22 @@ def pulse_canceller(radar_data):
 def freq_process(data):
     rx_chirps_fft = np.fft.fftshift(abs(np.fft.fft2(data)))
     range_doppler_data = np.log10(rx_chirps_fft).T
-    # or this is the longer way to do the fft2 function:
-    # rx_chirps_fft = np.fft.fft(data)
-    # rx_chirps_fft = np.fft.fft(rx_chirps_fft.T).T   
-    # rx_chirps_fft = np.fft.fftshift(abs(rx_chirps_fft))
-    range_doppler_data = np.log10(rx_chirps_fft).T
+    
+    # Calculate total number of velocity bins
+    num_vel_bins = range_doppler_data.shape[1]
+    
+    # Map each bin to its true velocity
+    vel_bin_values = np.linspace(-max_theoretical_vel, max_theoretical_vel, num_vel_bins)
+    
+    # Find which bins are within our display range
+    valid_bins = np.abs(vel_bin_values) <= max_doppler_vel
+    
+    # Zero out all bins outside our display range
+    for i in range(len(valid_bins)):
+        if not valid_bins[i]:
+            range_doppler_data[:, i] = min_scale
+    
+    # Apply other processing
     num_good = len(range_doppler_data[:,0])   
     center_delete = 0  # delete ground clutter velocity bins around 0 m/s
     if center_delete != 0:
@@ -169,7 +180,7 @@ range_doppler_fig, ax = plt.subplots(1, figsize=(7,7))
 
 # Calculate the correct extent for imshow
 # print(dist.max())
-extent = [-max_doppler_vel, max_doppler_vel, dist.min(), dist.max()]
+extent = [-max_theoretical_vel, max_theoretical_vel, dist.min(), dist.max()]
 range_doppler = ax.imshow(raw_data, aspect='auto', 
                           extent=extent, 
                           origin='lower', 
