@@ -29,11 +29,14 @@ This repository contains code and documentation for experiments using radar to t
 ### Preliminary Work
 - [x] Fix Range Doppler Jitters
 - [ ] Set up 3U CubeSat model with aluminum foil covering
-- [ ] Configure motion capture system for ground truth data
+- [ ] **Configure motion capture system for ground truth data**
 - [x] Establish data export format for raw I/Q samples
 - [ ] *Implement metadata logging for experimental parameters*
-- [ ] Synchronize radar and motion capture timestamps
+- [ ] **Synchronize radar and motion capture timestamps**
 - [ ] Determine damping coefficient for physics based estimation
+- [ ] *Create file structure code*
+- [ ] *Create auto program shutdown*
+- [ ] *Implement CFAR into post-processing program*
 
 ### Experiment 1: Filter Performance Analysis
 - [ ] Collect raw radar data of pendulum motion
