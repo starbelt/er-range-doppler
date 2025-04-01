@@ -39,22 +39,17 @@
 
 # %%
 # Imports
-import sys
 import time
-import matplotlib # type: ignore
-import matplotlib.pyplot as plt # type: ignore
 import numpy as np
 import datetime
 import os
 import csv
-plt.close('all')
-
+import adi # type: ignore
 
 '''This script uses the new Pluto TDD engine
    As of March 2024, this is in the main branch of https://github.com/analogdevicesinc/pyadi-iio
    Also, make sure your Pluto firmware is updated to rev 0.39 (or later)
 '''
-import adi # type: ignore
 print(adi.__version__)
 
 '''Key Parameters'''
