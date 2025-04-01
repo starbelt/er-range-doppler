@@ -43,7 +43,6 @@ This repository contains code and documentation for experiments using radar to t
 ### Experiment 1: Filter Performance Analysis
 - [ ] Collect raw radar data of pendulum motion
 - [ ] Implement MTI (Moving Target Indicator) filtering
-  - [ ] 1-pulse canceller
   - [ ] 2-pulse canceller
   - [ ] 3-pulse canceller
 - [ ] Implement CFAR (Constant False Alarm Rate) detection
