@@ -27,11 +27,11 @@ This repository contains code and documentation for experiments using radar to t
 ## Experiment Progress Tracker
 
 ### Preliminary Work
-- [ ] Fix Range Doppler Jitters
+- [x] Fix Range Doppler Jitters
 - [ ] Set up 3U CubeSat model with aluminum foil covering
 - [ ] Configure motion capture system for ground truth data
-- [ ] Establish data export format for raw I/Q samples
-- [ ] Implement metadata logging for experimental parameters
+- [x] Establish data export format for raw I/Q samples
+- [ ] *Implement metadata logging for experimental parameters*
 - [ ] Synchronize radar and motion capture timestamps
 - [ ] Determine damping coefficient for physics based estimation
 
