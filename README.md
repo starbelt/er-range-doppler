@@ -39,6 +39,7 @@ This repository contains code and documentation for experiments using radar to t
 - [ ] *Implement CFAR into post-processing program*
 - [ ] *Export processed images to file*
 - [ ] **Find a way to estimate bounding boxes**
+- [ ] **Labels**
 
 ### Experiment 1: Filter Performance Analysis
 - [ ] Collect raw radar data of pendulum motion
