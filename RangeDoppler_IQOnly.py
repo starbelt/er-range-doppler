@@ -300,7 +300,7 @@ if save_data == True:
             writer.writerow([t_diff])
     init_time = float((current_time[0] - start_time).total_seconds())
     write_time = float((datetime.datetime.now() - current_time[-1]).total_seconds())
-    print(f"Total processing time: {t_diff+write_time} seconds; {init_time} of startup, {t_diff - init_time} of data collection, {write_time} of write time")
+    print(f"Total processing time: {t_diff+write_time:.2f} seconds; {init_time:.2f} of startup, {t_diff - init_time:.2f} of data collection, {write_time:.2f} of write time")
 
 print("Cleaning up buffer...")
 my_sdr.tx_destroy_buffer()
