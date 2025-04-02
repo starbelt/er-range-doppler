@@ -58,7 +58,7 @@ tx_gain = 0   # must be between 0 and -88
 output_freq = 10e9
 chirp_BW = 1000e6
 ramp_time = 300  # us
-num_chirps = 64
+num_chirps = 128
 min_scale = 0
 max_scale = 10
 save_data = True 
@@ -74,7 +74,7 @@ max_range = max_dist
 
 # Experiment parameters
 string_length = 1
-sample_goal = 300
+sample_goal = 30
 dist_from_centroid = 0.5
 autoShutdown = True
 
@@ -296,4 +296,4 @@ if save_data == True:
         for t in current_time:
             t_diff = float((t - start_time).total_seconds())
             writer.writerow([t_diff])
-    # print(f"Exported data to {f_csv}")
+    print(f"Total professing time: {t_diff[-1]} seconds")
