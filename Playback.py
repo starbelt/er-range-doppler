@@ -275,7 +275,7 @@ ax.set_xlim([-max_doppler_vel, max_doppler_vel])  # Display only part of the vel
 ax.set_ylim([-1, dist.max()])
 ax.set_yticks(np.arange(-1, int(dist.max()), 1))
 ax.set_ylabel('Range [m]')
-main_title = 'Range Doppler Spectrum'
+main_title = f'Range Doppler: {num_chirps} Chirps | Range Res: {R_res:.2f}m | Vel Res: {v_res:.2f}m/s\nFilters: {MTI_filter if MTI_filter != "none" else "No MTI"}{f" | CFAR ({cfar_method})" if cfar_toggle else ""}'
 time_subtitle = ax.text(0.5, 0.98, '', transform=ax.transAxes, 
                         ha='center', va='top', fontsize=10)
 ax.set_title(main_title, pad=25)  # Add padding for subtitle
