@@ -1,6 +1,6 @@
 # Ignore DataSamples directory
-/DataSamples/
-/Downloads/DataSamples/
+# /DataSamples/
+# /Downloads/DataSamples/
 
 # Python bytecode
 __pycache__/
