@@ -300,8 +300,13 @@ if save_data == True:
             writer.writerow([t_diff])
     init_time = float((current_time[0] - start_time).total_seconds())
     write_time = float((datetime.datetime.now() - current_time[-1]).total_seconds())
-    print(f"Total processing time: {t_diff+write_time:.2f} seconds; {init_time:.2f} of startup, {t_diff - init_time:.2f} of data collection, {write_time:.2f} of write time")
-
+    data_collect_time = t_diff - init_time
+    total_time = t_diff + write_time
+    print(f"Total processing time: {total_time:.2f} seconds; {init_time:.2f} of startup, {data_collect_time:.2f} of data collection, {write_time} of write time")
+    
+    existing_data = np.load(f[:-4]+"_config.npy", allow_pickle=True)
+    added_time_data = np.append(existing_data,[init_time, write_time, data_collect_time, total_time])
+    np.save(f[:-4]+"_config.npy", added_time_data)
 print("Cleaning up buffer...")
 my_sdr.tx_destroy_buffer()
 print("Pluto Buffer Cleared!")
