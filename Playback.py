@@ -72,13 +72,9 @@ chirp_BW = config[4]
 ramp_time_s = config[5]
 frame_length_ms = config[6]
 max_doppler_vel = config[7] if len(config) > 7 else 1.5
-max_scale = config[8] if len(config) > 8 else 10 
-min_scale = config[9] if len(config) > 9 else 0 
-min_doppler_plot_vel = config[10] if len(config) > 10 else 2 
-string_length = config[11] if len(config) > 11 else 1.75 
-sample_goal = config[12] if len(config) > 12 else 300 
-dist_from_centroid = config[13] if len(config) > 13 else 2.54 
-init_time, write_time, data_collect_time, total_time = config[14:18] if len(config) > 14 else (0, 0, 0, 0)
+max_range = config[8] if len(config) > 8 else 10 #unused
+upper_freq = config[9] if len(config) > 9 else -sample_rate/2 #unused
+lower_freq = config[10] if len(config) > 10 else sample_rate/2 #unused
 time_data = pd.read_csv(f"{f[:-4]}_time.csv")
 num_samples = len(all_data[0][0])
 
