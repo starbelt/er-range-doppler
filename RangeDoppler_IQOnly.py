@@ -1,4 +1,3 @@
-# %%
 # Copyright (C) 2024 Analog Devices, Inc.
 #
 # All rights reserved.
@@ -36,8 +35,10 @@
    Updated for new TDD engine (rev 0.39 Pluto firmware)
    Added pulse canceller MTI filter
    Jon Kraft, Sept 25 2024'''
+'''This script uses the new Pluto TDD engine
+   As of March 2024, this is in the main branch of https://github.com/analogdevicesinc/pyadi-iio
+   Also, make sure your Pluto firmware is updated to rev 0.39 (or later)'''
 
-# %%
 # Imports
 import time
 import numpy as np
@@ -46,26 +47,21 @@ import os
 import csv
 import adi # type: ignore
 
-'''This script uses the new Pluto TDD engine
-   As of March 2024, this is in the main branch of https://github.com/analogdevicesinc/pyadi-iio
-   Also, make sure your Pluto firmware is updated to rev 0.39 (or later)
-'''
 print(adi.__version__)
 
-'''Key Parameters'''
+# Parameters
 sample_rate = .64e6 
-center_freq = 2.1e9 # test with .55e9 for upped refresh rate
+center_freq = 2.1e9 
 signal_freq = 100e3
 rx_gain = 60   # must be between -3 and 70
 tx_gain = 0   # must be between 0 and -88
 output_freq = 10e9
 chirp_BW = 1000e6
-ramp_time = 300  # us, mess with this (increase) for better velocity resolution
+ramp_time = 300  # us
 num_chirps = 64
-# max_range = 10
 min_scale = 0
 max_scale = 10
-save_data = True   # saves data for later processing (use "Range_Doppler_Processing.py")
+save_data = True 
 start_time = datetime.datetime.now() # Get start time
 st = str(start_time).replace(":", ".").replace(" ", "_") # Remove ":" and replace spaces with "_" 
 st = f"{st}_{num_chirps}chirps"
@@ -76,9 +72,12 @@ max_dist = 10
 min_dist = 0
 max_range = max_dist
 
-# %%
-""" Program the basic hardware settings
-"""
+# Experiment parameters
+string_length = 1
+sample_goal = 300
+dist_from_centroid = 0.5
+autoShutdown = True
+
 # Instantiate all the Devices
 rpi_ip = "ip:phaser.local"  # IP address of the Raspberry Pi
 sdr_ip = "ip:192.168.2.1"  # "192.168.2.1, or pluto.local"  # IP address of the Transceiver Block
@@ -93,7 +92,7 @@ my_phaser.load_phase_cal()
 for i in range(0, 8):
     my_phaser.set_chan_phase(i, 0)
 
-#gain_list = [127] * 8
+#gain_list = [127] * 8 # Uniform max gain
 gain_list = [8, 34, 84, 127, 127, 84, 34, 8]  # Blackman taper
 for i in range(0, len(gain_list)):
     my_phaser.set_chan_gain(i, gain_list[i], apply_cal=True)
@@ -138,9 +137,6 @@ my_phaser.sing_ful_tri = 0  # full triangle enable/disable -- this is used with 
 my_phaser.tx_trig_en = 1  # start a ramp with TXdata
 my_phaser.enable = 0  # 0 = PLL enable.  Write this last to update all the registers
 
-# %%
-""" Synchronize chirps to the start of each Pluto receive buffer
-"""
 # Configure TDD controller
 sdr_pins = adi.one_bit_adc_dac(sdr_ip)
 sdr_pins.gpio_tdd_ext_sync = True # If set to True, this enables external capture triggering using the L24N GPIO on the Pluto.  When set to false, an internal trigger pulse will be generated every second
@@ -151,7 +147,6 @@ tdd.sync_external = True
 tdd.startup_delay_ms = 0
 PRI_ms = ramp_time/1e3 + .1 #0.2 if this breaks stuff
 tdd.frame_length_ms = PRI_ms    # each chirp is spaced this far apart
-#tdd.frame_length_raw = PRI_ms/1000 * 2 * sample_rate
 tdd.burst_count = num_chirps       # number of chirps in one continuous receive buffer
 
 tdd.channel[0].enable = True
@@ -204,9 +199,6 @@ print("buffer_size:", buffer_size)
 my_sdr.rx_buffer_size = buffer_size
 print("buffer_time:", buffer_time, " ms")
 
-# %%
-""" Calculate ramp parameters
-"""
 PRI_s = PRI_ms / 1e3
 PRF = 1 / PRI_s
 num_bursts = tdd.burst_count
@@ -215,11 +207,9 @@ num_bursts = tdd.burst_count
 N_frame = int(PRI_s * float(sample_rate))
 
 # Obtain range-FFT x-axis
-c = 3e8
+c = 2.99792458e8
 wavelength = c / output_freq
 slope = BW / ramp_time_s
-upper_freq = (max_dist * 2 * slope / c) + signal_freq + 1
-lower_freq = (min_dist * 2 * slope / c) + signal_freq - 1
 freq = np.linspace(-sample_rate/2, sample_rate/2, N_frame)
 dist = (freq - signal_freq) * c / (2 * slope)
 
@@ -233,13 +223,7 @@ calculated_max_doppler_vel = 56 * v_res / 2
 max_doppler_vel = max(calculated_max_doppler_vel, min_doppler_plot_vel)
 # Doppler spectrum limits
 max_doppler_freq = PRF / 2
-# max_doppler_vel = max_doppler_freq * wavelength / 2
 
-
-
-# %%
-""" Create a sinewave waveform for Pluto's transmitter
-"""
 # Create a sinewave waveform
 N = int(2**18)
 fc = int(signal_freq)
@@ -252,17 +236,12 @@ iq = 0.9* (i + 1j * q)
 # transmit data from Pluto
 my_sdr.tx([iq, iq])
 
-
-# %%
 # Function to collect data
 i = 0
 cmn = ''
 def get_radar_data():
     global range_doppler
     # Collect data
-    # print("getdata start")
-    # print(datetime.datetime.now())
-    
     my_phaser._gpios.gpio_burst = 0
     my_phaser._gpios.gpio_burst = 1
     my_phaser._gpios.gpio_burst = 0
@@ -272,14 +251,11 @@ def get_radar_data():
     sum_data = chan1+chan2
 
     # Process data
-    # Make a 2D array of the chirps for each burst
     rx_bursts = np.zeros((num_bursts, good_ramp_samples), dtype=complex)
     for burst in range(num_bursts):
         start_index = start_offset_samples + burst * N_frame
         stop_index = start_index + good_ramp_samples
         rx_bursts[burst] = sum_data[start_index:stop_index]
-    # print("getdata stop")
-    # print(datetime.datetime.now())
     return rx_bursts
     
 rx_bursts = get_radar_data()
@@ -295,7 +271,6 @@ try:
             all_data.append(rx_bursts)
             current_time.append(datetime.datetime.now())
             print("save")
-        
         good_samples_time = good_ramp_samples / sample_rate
         time.sleep(PRI_s - good_samples_time)
         # print("try stop")
@@ -303,7 +278,6 @@ try:
 except KeyboardInterrupt:  # press ctrl-c to stop the loop
     pass
 
-# %%
 # Pluto transmit shutdown
 my_sdr.tx_destroy_buffer()
 print("Pluto Buffer Cleared!")
@@ -318,13 +292,10 @@ if save_data == True:
     for t in current_time:
             t_diff = float((t - start_time).total_seconds())
     np.save(f, all_data)
-    np.save(f[:-4]+"_config.npy", [sample_rate, signal_freq, output_freq, num_chirps, chirp_BW, ramp_time_s, tdd.frame_length_ms, max_doppler_vel, max_range, upper_freq, lower_freq])
-    # max_range, upper_freq, and lower_freq are unused in playback file
-
+    np.save(f[:-4]+"_config.npy", [sample_rate, signal_freq, output_freq, num_chirps, chirp_BW, ramp_time_s, tdd.frame_length_ms, max_doppler_vel, max_scale, min_scale, min_doppler_plot_vel, string_length, sample_goal, dist_from_centroid])
+    
     file_exists = os.path.isfile(f)  # Check if file exists
-    
     f_time = f"{f[:-4]}_time.csv"
-    
     with open(f_time, mode='a', newline='') as file:
         writer = csv.writer(file)
         if not file_exists:
