@@ -296,4 +296,4 @@ if save_data == True:
         for t in current_time:
             t_diff = float((t - start_time).total_seconds())
             writer.writerow([t_diff])
-    print(f"Total professing time: {t_diff[-1]} seconds")
+    print(f"Total professing time: {t_diff} seconds")
