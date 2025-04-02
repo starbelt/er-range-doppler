@@ -261,30 +261,23 @@ def get_radar_data():
 rx_bursts = get_radar_data()
 all_data = []
 current_time = []
-
+i=0
 try:
-    while True:
-        # print("try start")
-        # print(datetime.datetime.now())
+    while i <= sample_goal:
         rx_bursts = get_radar_data()
         if save_data == True:
             all_data.append(rx_bursts)
             current_time.append(datetime.datetime.now())
-            print("save")
+            print(f"Saved {i} of {sample_goal} bursts")
         good_samples_time = good_ramp_samples / sample_rate
+        i+=1
         time.sleep(PRI_s - good_samples_time)
-        # print("try stop")
-        # print(datetime.datetime.now())
 except KeyboardInterrupt:  # press ctrl-c to stop the loop
     pass
 
 # Pluto transmit shutdown
 my_sdr.tx_destroy_buffer()
 print("Pluto Buffer Cleared!")
-refreshrate = current_time[-1] - current_time[-2]
-refreshrate = float(refreshrate.total_seconds())
-refreshrate = 1 / refreshrate
-print("Refresh Rate: ", refreshrate)
 if save_data == True:
     folder = f[:-18]
     if not os.path.exists(folder):
