@@ -298,8 +298,8 @@ if save_data == True:
         for tval in current_time:
             t_diff = float((tval - start_time).total_seconds())
             writer.writerow([t_diff])
-    init_time = float((tval[0] - start_time).total_seconds())
-    write_time = float((tval[-1] - datetime.datetime.now()).total_seconds())
+    init_time = float((current_time[0] - start_time).total_seconds())
+    write_time = float((current_time[-1] - datetime.datetime.now()).total_seconds())
     print(f"Total processing time: {t_diff+write_time} seconds; {init_time} of startup, {t_diff - init_time} of data collection, {write_time} of write time")
 
 print("Cleaning up buffer...")
