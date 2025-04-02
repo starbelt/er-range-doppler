@@ -276,14 +276,16 @@ except KeyboardInterrupt:  # press ctrl-c to stop the loop
     pass
 
 # Pluto transmit shutdown
-my_sdr.tx_destroy_buffer()
-print("Pluto Buffer Cleared!")
+print("Shutting down hardware...")
+tdd.enable = False
+time.sleep(0.1)
+my_phaser.enable = 0  # Disable the PLL
+time.sleep(0.1)
+
 if save_data == True:
     folder = f[:-18]
     if not os.path.exists(folder):
         os.makedirs(folder)
-    for t in current_time:
-            t_diff = float((t - start_time).total_seconds())
     np.save(f, all_data)
     np.save(f[:-4]+"_config.npy", [sample_rate, signal_freq, output_freq, num_chirps, chirp_BW, ramp_time_s, tdd.frame_length_ms, max_doppler_vel, max_scale, min_scale, min_doppler_plot_vel, string_length, sample_goal, dist_from_centroid])
     
@@ -296,4 +298,8 @@ if save_data == True:
         for t in current_time:
             t_diff = float((t - start_time).total_seconds())
             writer.writerow([t_diff])
-    print(f"Total professing time: {t_diff} seconds")
+    print(f"Total processing time: {t_diff} seconds")
+
+print("Cleaning up buffer...")
+my_sdr.tx_destroy_buffer()
+print("Pluto Buffer Cleared!")
