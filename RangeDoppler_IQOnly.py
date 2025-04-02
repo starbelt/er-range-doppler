@@ -295,10 +295,11 @@ if save_data == True:
         writer = csv.writer(file)
         if not file_exists:
             writer.writerow(["Time Since Start (s)"])
+        init_time = float((t[0] - start_time).total_seconds())
         for t in current_time:
             t_diff = float((t - start_time).total_seconds())
             writer.writerow([t_diff])
-    print(f"Total processing time: {t_diff} seconds")
+    print(f"Total processing time: {t_diff} seconds; {init_time} of startup, {t_diff - init_time} of data collection")
 
 print("Cleaning up buffer...")
 my_sdr.tx_destroy_buffer()
