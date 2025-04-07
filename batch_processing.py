@@ -7,7 +7,8 @@ import argparse
 import pandas as pd # type: ignore
 import os
 import sys
-import cv2
+import cv2 # type: ignore
+import csv
 
 def main():
     global num_chirps, num_samples, min_scale, max_scale, max_theoretical_vel, max_doppler_vel, cfar_params, dist, velocity_bins
@@ -28,11 +29,11 @@ def main():
     # CFAR parameters
     cfar_params = {
                 'average': {'num_guard_cells_range': 3, 'num_guard_cells_doppler': 3, 'num_ref_cells_range': 5, 'num_ref_cells_doppler': 5, 'bias': 1, 'cfar_method': 'average'},
-                'greatest': {'num_guard_cells_range': 3, 'num_guard_cells_doppler': 3, 'num_ref_cells_range': 5, 'num_ref_cells_doppler': 5, 'bias': 1, 'cfar_method': 'greatest'},
-                'smallest': {'num_guard_cells_range': 3, 'num_guard_cells_doppler': 3, 'num_ref_cells_range': 5, 'num_ref_cells_doppler': 5, 'bias': 1, 'cfar_method': 'smallest'},
+                'greatest': {'num_guard_cells_range': 1, 'num_guard_cells_doppler': 1, 'num_ref_cells_range': 3, 'num_ref_cells_doppler': 3, 'bias': .2, 'cfar_method': 'greatest'},
+                'smallest': {'num_guard_cells_range': 2, 'num_guard_cells_doppler': 2, 'num_ref_cells_range': 4, 'num_ref_cells_doppler': 4, 'bias': 1.9, 'cfar_method': 'smallest'},
                 }
 
-
+    max_dist = 10
     custom_filter = False
 
     optimal_min_scale = 5
@@ -111,7 +112,16 @@ def main():
     
 def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
     global num_chirps, num_samples, cfar_params, min_scale, max_scale, dist 
+    time_sum = 0
+
+    csv_file_name = f"{output_dir}processed_data.csv"
+    with open(csv_file_name, 'w',newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Frame', 'Processing Time (s)', 'Total Time (s)', 'Peak Range (m)', 'Peak Velocity (m/s)', 'Peak Magnitude'])
+
+    start_time = time.time()
     for i in range(len(all_data)):
+        start_proc_time = time.time()
         radar_data = all_data[i]
         range_doppler_data = freq_process(radar_data)
 
@@ -140,6 +150,7 @@ def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
                 CFAR_smallest_parameters = {**params, 'min_value': min_scale}
                 cfar_filtered_data, _ = cfar_2d(mti_filtered_data, **CFAR_smallest_parameters)
 
+        end_proc_time = time.time()
         output_file_title = f"{i:04d}.npy"
         img_file_title = f"{i:04d}.png"
 
@@ -164,31 +175,66 @@ def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
         rows, cols = nomalized_data.shape
         vel_values = np.linspace(-max_theoretical_vel, max_theoretical_vel, cols)
         range_values = np.linspace(dist.min(), dist.max(), rows)
-
-        # For velocity (x-axis), if you want to crop to specific velocity range
-        # For example if max_doppler_vel < max_theoretical_vel
         vel_mask = np.abs(vel_values) <= max_doppler_vel
         start_col = np.argmax(vel_mask)
         end_col = cols - np.argmax(vel_mask[::-1])
 
-        # For range (y-axis), if you want to start from a specific minimum range
-        # Find the index closest to your min range value (e.g., 0 meters)
-        min_range_idx = np.argmin(np.abs(range_values - (-3.2)))
-
-        # Crop the data
+        min_range_idx = np.argmin(np.abs(range_values - (-3.2))) #-3.2 m is bottom of scale for 56 pixel height
         cropped_data = nomalized_data[min_range_idx:, start_col:end_col]
-
-        # Apply colormap and save
         img = cv2.applyColorMap(cropped_data, cv2.COLORMAP_VIRIDIS)
-
-        # Optional: Add scale bar or text labels with physical units
-        # cv2.putText(img, f"{max_doppler_vel} m/s", (img.shape[1]-60, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
-
         cv2.imwrite(img_output_file_name, img)
 
-    print(f"Processed {len(all_data)} frames with MTI: {MTI_opt} and CFAR: {cfar_opt}")
+        proc_time = end_proc_time - start_proc_time
+        time_sum += proc_time
 
-# Function to process data
+        peak_range, peak_velocity, peak_magnitude = find_peak(cfar_filtered_data,range_values,vel_values, 
+            max_doppler_vel=max_doppler_vel*.7,
+            min_range=0,
+            max_range=dist.max()
+        )
+        end_write_time = time.time()
+        tot_time = end_write_time - start_time
+        with open(csv_file_name, 'a',newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([i, proc_time, tot_time, peak_range, peak_velocity, peak_magnitude])
+
+    print(f"Processed {len(all_data)} frames in {time_sum:.1f} s with MTI: {MTI_opt} and CFAR: {cfar_opt}")
+
+def find_peak(radar_data, dist, vel_values, max_doppler_vel=None, min_range=-1, max_range=None):
+    # Set default constraints if not provided
+    if max_doppler_vel is None:
+        max_doppler_vel = np.max(np.abs(vel_values))
+    if max_range is None:
+        max_range = np.max(dist)
+        
+    rows, cols = radar_data.shape
+    
+    # Find indices that satisfy the constraints
+    range_indices = np.where((dist >= min_range) & (dist <= max_range))[0]
+    vel_indices = np.where(np.abs(vel_values) <= max_doppler_vel)[0]
+    
+    if len(range_indices) == 0 or len(vel_indices) == 0:
+        return None, None, None
+    
+    # Extract the constrained data
+    constrained_data = radar_data[np.ix_(range_indices, vel_indices)]
+    
+    # Find the position of the maximum value
+    if constrained_data.size > 0:
+        max_idx = np.unravel_index(np.argmax(constrained_data), constrained_data.shape)
+        peak_range_idx = range_indices[max_idx[0]]
+        peak_vel_idx = vel_indices[max_idx[1]]
+        
+        peak_range = dist[peak_range_idx]
+        peak_velocity = vel_values[peak_vel_idx]
+        peak_magnitude = radar_data[peak_range_idx, peak_vel_idx]
+        if peak_magnitude < 1:
+            return None, None, None
+        
+        return peak_range, peak_velocity, peak_magnitude
+    else:
+        return None, None, None
+    
 def pulse_canceller(radar_data):
     global num_chirps, num_samples
     rx_chirps = []
