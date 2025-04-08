@@ -114,7 +114,16 @@ def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
     global num_chirps, num_samples, cfar_params, min_scale, max_scale, dist 
     time_sum = 0
 
-    csv_file_name = f"{output_dir}processed_data.csv"
+    if MTI_opt == 'none' and cfar_opt == 'none':
+        csv_file_name = f"{output_dir}processed_data.csv"
+    elif MTI_opt == 'none' and cfar_opt != 'none':
+        csv_file_name = f"{output_dir}/{cfar_opt}/processed_data.csv"
+    elif cfar_opt == 'none' and MTI_opt != 'none':
+        csv_file_name = f"{output_dir}/{MTI_opt}/processed_data.csv"
+    else:
+        csv_file_name = f"{output_dir}{cfar_opt}_{MTI_opt}/processed_data.csv"
+
+    
     with open(csv_file_name, 'w',newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Frame', 'Processing Time (s)', 'Total Time (s)', 'Peak Range (m)', 'Peak Velocity (m/s)', 'Peak Magnitude'])
@@ -153,19 +162,22 @@ def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
         end_proc_time = time.time()
         output_file_title = f"{i:04d}.npy"
         img_file_title = f"{i:04d}.png"
-
         if MTI_opt == 'none' and cfar_opt == 'none':
             data_output_file_name = f"{output_dir}/Data/{output_file_title}"
             img_output_file_name = f"{output_dir}/Frames/{img_file_title}"
+            # csv_file_name = f"{output_dir}processed_data.csv"
         elif MTI_opt == 'none' and cfar_opt != 'none':
             data_output_file_name = f"{output_dir}/{cfar_opt}/Data/{output_file_title}"
             img_output_file_name = f"{output_dir}/{cfar_opt}/Frames/{img_file_title}"
+            # csv_file_name = f"{output_dir}/{cfar_opt}/processed_data.csv"
         elif cfar_opt == 'none' and MTI_opt != 'none':
             data_output_file_name = f"{output_dir}/{MTI_opt}/Data/{output_file_title}"
             img_output_file_name = f"{output_dir}/{MTI_opt}/Frames/{img_file_title}"
+            # csv_file_name = f"{output_dir}/{MTI_opt}/processed_data.csv"
         else:
             data_output_file_name = f"{output_dir}{cfar_opt}_{MTI_opt}/Data/{output_file_title}"
             img_output_file_name = f"{output_dir}{cfar_opt}_{MTI_opt}/Frames/{img_file_title}"
+            # csv_file_name = f"{output_dir}{cfar_opt}_{MTI_opt}/processed_data.csv"
 
         np.save(data_output_file_name, cfar_filtered_data)
 
