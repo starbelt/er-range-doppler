@@ -11,7 +11,7 @@ import cv2 # type: ignore
 import csv
 
 def main():
-    global num_chirps, num_samples, min_scale, max_scale, max_theoretical_vel, max_doppler_vel, cfar_params, dist, velocity_bins
+    global num_chirps, num_samples, min_scale, max_scale, max_theoretical_vel, max_doppler_vel, cfar_params, dist, velocity_bins, optimal_max_scale, optimal_min_scale, imported_max_scale, imported_min_scale, R_res
     # Parse the input file argument
     parser = argparse.ArgumentParser(description='Process FMCW Range Data')
     parser.add_argument('input_file', type=str, help='Path to the input .npy file')
@@ -36,7 +36,7 @@ def main():
     max_dist = 10
     custom_filter = False
 
-    optimal_min_scale = 5
+    optimal_min_scale = 4.5
     optimal_max_scale = 10
     if custom_filter:
         min_scale = optimal_min_scale
@@ -54,8 +54,12 @@ def main():
     if not custom_filter:
         max_scale = config[8] if len(config) > 8 else 10 
         min_scale = config[9] if len(config) > 9 else 0 
+        imported_max_scale = config[8] if len(config) > 8 else 10 
+        imported_min_scale = config[9] if len(config) > 9 else 0
+        # print(imported_min_scale, imported_max_scale)
         if min_scale > max_scale:
             min_scale = 0
+            imported_min_scale = 0
     min_doppler_plot_vel = config[10] if len(config) > 10 else 2 
     string_length = config[11] if len(config) > 11 else 2 
     sample_goal = config[12] if len(config) > 12 else 2 
@@ -111,17 +115,25 @@ def main():
                 process_filter(MTI_opt, cfar_opt, all_data, combined_dir)
     
 def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
-    global num_chirps, num_samples, cfar_params, min_scale, max_scale, dist 
+    global num_chirps, num_samples, cfar_params, min_scale, max_scale, dist, optimal_min_scale, optimal_max_scale, imported_max_scale, imported_min_scale, R_res
     time_sum = 0
 
     if MTI_opt == 'none' and cfar_opt == 'none':
         csv_file_name = f"{output_dir}processed_data.csv"
+        min_scale = optimal_min_scale
+        max_scale = optimal_max_scale
     elif MTI_opt == 'none' and cfar_opt != 'none':
         csv_file_name = f"{output_dir}/{cfar_opt}/processed_data.csv"
+        min_scale = imported_min_scale
+        max_scale = imported_max_scale
     elif cfar_opt == 'none' and MTI_opt != 'none':
         csv_file_name = f"{output_dir}/{MTI_opt}/processed_data.csv"
+        min_scale = optimal_min_scale
+        max_scale = optimal_max_scale
     else:
         csv_file_name = f"{output_dir}{cfar_opt}_{MTI_opt}/processed_data.csv"
+        min_scale = imported_min_scale
+        max_scale = imported_max_scale
 
     
     with open(csv_file_name, 'w',newline='') as file:
@@ -148,6 +160,7 @@ def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
         else:
             if cfar_opt == 'average':
                 params = cfar_params[cfar_opt]
+                # print(min_scale)
                 CFAR_avg_parameters = {**params, 'min_value': min_scale}
                 cfar_filtered_data, _ = cfar_2d(mti_filtered_data, **CFAR_avg_parameters)
             elif cfar_opt == 'greatest':
@@ -191,7 +204,11 @@ def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
         start_col = np.argmax(vel_mask)
         end_col = cols - np.argmax(vel_mask[::-1])
 
-        min_range_idx = np.argmin(np.abs(range_values - (-3.2))) #-3.2 m is bottom of scale for 56 pixel height
+        min_dist_for_56 = dist.max() - 56*R_res - R_res * 6
+        # print(f"min_dist_for_56: {min_dist_for_56:.2f} m")
+        # print(f"dist.max(): {dist.max():.2f} m")
+
+        min_range_idx = np.argmin(np.abs(range_values - min_dist_for_56)) 
         cropped_data = nomalized_data[min_range_idx:, start_col:end_col]
         img = cv2.applyColorMap(cropped_data, cv2.COLORMAP_VIRIDIS)
         cv2.imwrite(img_output_file_name, img)
@@ -339,7 +356,7 @@ def cfar_2d(range_doppler_data, num_guard_cells_range=4, num_guard_cells_doppler
     return filtered_data, threshold
 
 def freq_process(data):
-    global max_theoretical_vel, max_doppler_vel
+    global max_theoretical_vel, max_doppler_vel, min_scale, max_scale
     rx_chirps_fft = np.fft.fftshift(abs(np.fft.fft2(data)))
     range_doppler_data = np.log10(rx_chirps_fft).T
     
