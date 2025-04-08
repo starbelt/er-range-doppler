@@ -74,7 +74,7 @@ max_range = max_dist
 
 # Experiment parameters
 string_length = 1
-sample_goal = 30
+sample_goal = 1000
 dist_from_centroid = 0.5
 autoShutdown = True
 
