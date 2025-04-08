@@ -1,7 +1,7 @@
 # Ignore DataSamples directory
 # /DataSamples/
 # /Downloads/DataSamples/
-DataSamples/2025-04-08_11.26.02.336613_128chirps/
+DataSamples/2025-04-08_11.26.02.336613_128chirps/range_doppler.npy
 
 # Python bytecode
 __pycache__/
