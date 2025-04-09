@@ -55,7 +55,7 @@ all_data = np.load(f)
 
 
 MTI_filter = 'none'  # choices are none, 2pulse, or 3pulse
-cfar_toggle = False     # Enable/disable CFAR filtering
+cfar_toggle = True     # Enable/disable CFAR filtering
 cfar_method = 'average'  # CFAR method: 'average', 'greatest', 'smallest'
 cfar_guard_cells_range = 3    # Number of guard cells in range dimension
 cfar_guard_cells_doppler = 3  # Number of guard cells in Doppler dimension
@@ -230,7 +230,8 @@ def freq_process(data):
     vel_bin_values = np.linspace(-max_theoretical_vel, max_theoretical_vel, num_vel_bins)
     
     # Find which bins are within our display range
-    valid_bins = np.abs(vel_bin_values) <= max_doppler_vel
+    valid_bins = np.abs(vel_bin_values) <= (max_doppler_vel + v_res * cfar_guard_cells_doppler + v_res * cfar_ref_cells_doppler)
+    # valid_bins = np.abs(vel_bin_values) <= max_doppler_vel
     
     # Zero out all bins outside our display range
     for i in range(len(valid_bins)):

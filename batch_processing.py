@@ -11,7 +11,7 @@ import cv2 # type: ignore
 import csv
 
 def main():
-    global num_chirps, num_samples, min_scale, max_scale, max_theoretical_vel, max_doppler_vel, cfar_params, dist, velocity_bins, optimal_max_scale, optimal_min_scale, imported_max_scale, imported_min_scale, R_res
+    global num_chirps, num_samples, min_scale, max_scale, max_theoretical_vel, max_doppler_vel, cfar_params, dist, velocity_bins, optimal_max_scale, optimal_min_scale, imported_max_scale, imported_min_scale, R_res, v_res
     # Parse the input file argument
     parser = argparse.ArgumentParser(description='Process FMCW Range Data')
     parser.add_argument('input_file', type=str, help='Path to the input .npy file')
@@ -216,11 +216,13 @@ def process_filter(MTI_opt, cfar_opt, all_data, output_dir):
         proc_time = end_proc_time - start_proc_time
         time_sum += proc_time
 
+        # print(max_doppler_vel)
         peak_range, peak_velocity, peak_magnitude = find_peak(cfar_filtered_data,range_values,vel_values, 
             max_doppler_vel=max_doppler_vel*.7,
             min_range=0,
             max_range=dist.max()
         )
+        # print(max_doppler_vel)
         end_write_time = time.time()
         tot_time = end_write_time - start_time
         with open(csv_file_name, 'a',newline='') as file:
@@ -356,7 +358,7 @@ def cfar_2d(range_doppler_data, num_guard_cells_range=4, num_guard_cells_doppler
     return filtered_data, threshold
 
 def freq_process(data):
-    global max_theoretical_vel, max_doppler_vel, min_scale, max_scale
+    global max_theoretical_vel, max_doppler_vel, min_scale, max_scale, v_res
     rx_chirps_fft = np.fft.fftshift(abs(np.fft.fft2(data)))
     range_doppler_data = np.log10(rx_chirps_fft).T
     
@@ -367,7 +369,7 @@ def freq_process(data):
     vel_bin_values = np.linspace(-max_theoretical_vel, max_theoretical_vel, num_vel_bins)
     
     # Find which bins are within our display range
-    valid_bins = np.abs(vel_bin_values) <= max_doppler_vel
+    valid_bins = np.abs(vel_bin_values) <= (max_doppler_vel + 3 * v_res + 5 * v_res)
     
     # Zero out all bins outside our display range
     for i in range(len(valid_bins)):
